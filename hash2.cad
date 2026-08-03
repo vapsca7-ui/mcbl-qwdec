@@ -1,0 +1,14 @@
+const bcrypt = require('bcrypt');
+
+(async () => {
+    const password = 'мой_сложный_пароль';
+    const saltRounds = 10; // чем больше, тем медленнее и безопаснее
+
+    // Хеширование пароля
+    const hash = await bcrypt.hash(password, saltRounds);
+    console.log('Хеш пароля:', hash);
+
+    // Проверка пароля
+    const isMatch = await bcrypt.compare('мой_сложный_пароль', hash);
+    console.log('Пароль верный?', isMatch);
+})();

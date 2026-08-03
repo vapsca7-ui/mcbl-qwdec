@@ -1,0 +1,9 @@
+const crypto = require('crypto');
+
+function sha256(text) {
+    return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
+}
+
+const input = 'Привет, мир!';
+const hash = sha256(input);
+console.log('Хеш:', hash);
