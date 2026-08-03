@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Перебор с высокой точностью</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #log { background: #f5f5f5; padding: 15px; height: 200px; overflow-y: auto; font-family: monospace; border: 1px solid #ccc; }
+        button { padding: 8px 16px; cursor: pointer; }
+        label { display: block; margin-top: 10px; }
+    </style>
+    <!-- Подключаем decimal.js для точных вычислений -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+</head>
+<body>
+    <h2>Перебор значений с высокой точностью (Decimal)</h2>
+    
+    <label>Начальное значение (например, 1e-30):</label>
+    <input type="text" id="start" value="0.000000000000000000000000000001">
+
+    <label>Шаг (например, 1e-30):</label>
+    <input type="text" id="step" value="0.000000000000000000000000000001">
+
+    <label>Сколько шагов сделать всего (лучше не больше 1000 для теста):</label>
+    <input type="number" id="totalSteps" value="10">
+
+    <label>Шагов в секунду (не ставьте слишком много, иначе браузер зависнет):</label>
+    <input type="number" id="stepsPerSecond" value="5">
+
+    <br><br>
+    <button onclick="startLoop()">Запустить перебор</button>
+    <button onclick="stopLoop()" style="background:#ef4444; color:white;">Стоп</button>
+
+    <div style="margin-top:15px;"><strong>Лог:</strong></div>
+    <div id="log"></div>
+
+    <script>
+        Decimal.set({ precision: 50 }); // точность 50 знаков
+
+        let intervalId = null;
+        let stepsDone = 0;
+        let totalSteps = 0;
+        let currentValue = null;
+        let stepValue = null;
+
+        function startLoop() {
+            const startStr = document.getElementById('start').value.trim();
+            const stepStr = document.getElementById('step').value.trim();
+            totalSteps = parseInt(document.getElementById('totalSteps').value) || 0;
+            const stepsPerSecond = parseInt(document.getElementById('stepsPerSecond').value) || 1;
+
+            if (!startStr || !stepStr || totalSteps <= 0 || stepsPerSecond <= 0) {
+                alert('Проверьте ввод: все поля должны быть заполнены и положительны.');
+                return;
+            }
+
+            currentValue = new Decimal(startStr);
+            stepValue = new Decimal(stepStr);
+            stepsDone = 0;
+
+            const log = document.getElementById('log');
+            log.innerHTML = '';
+
+            const interval = 1000 / stepsPerSecond;
+
+            intervalId = setInterval(() => {
+                if (stepsDone >= totalSteps) {
+                    stopLoop();
+                    return;
+                }
+
+                const valStr = currentValue.toString();
+                const timeStr = new Date().toLocaleTimeString();
+
+                log.innerHTML += `[${timeStr}] Шаг ${stepsDone + 1}: значение = ${valStr}\n`;
+                log.scrollTop = log.scrollHeight; // автопрокрутка вниз
+
+                currentValue = currentValue.plus(stepValue);
+                stepsDone++;
+            }, interval);
+        }
+
+        function stopLoop() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+    </script>
+</body>
+</html>
